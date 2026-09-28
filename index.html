@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>🎲 Lucky Dice Game</title>
+
+    <style>
+      /* =========================
+           BASIC PAGE DESIGN
+        ========================== */
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        min-height: 100vh;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        background: linear-gradient(135deg, #667eea, #764ba2);
+
+        color: white;
+      }
+
+      /* =========================
+           GAME BOX
+        ========================== */
+
+      .game-container {
+        width: 90%;
+        max-width: 450px;
+
+        background: rgba(255, 255, 255, 0.15);
+
+        padding: 35px;
+
+        border-radius: 25px;
+
+        text-align: center;
+
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+
+        backdrop-filter: blur(10px);
+      }
+
+      h1 {
+        font-size: 36px;
+        margin-bottom: 10px;
+      }
+
+      .subtitle {
+        margin-bottom: 30px;
+        opacity: 0.9;
+      }
+
+      /* =========================
+           DICE
+        ========================== */
+
+      .dice {
+        width: 130px;
+        height: 130px;
+
+        background: white;
+
+        color: #333;
+
+        border-radius: 20px;
+
+        margin: 20px auto;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        font-size: 70px;
+
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+
+        transition: transform 0.3s;
+      }
+
+      .dice.rolling {
+        transform: rotate(360deg) scale(1.1);
+      }
+
+      /* =========================
+           RESULT MESSAGE
+        ========================== */
+
+      #message {
+        min-height: 30px;
+
+        font-size: 20px;
+
+        margin: 20px 0;
+
+        font-weight: bold;
+      }
+
+      /* =========================
+           BUTTON
+        ========================== */
+
+      button {
+        border: none;
+
+        padding: 14px 25px;
+
+        margin: 8px;
+
+        border-radius: 10px;
+
+        font-size: 17px;
+
+        font-weight: bold;
+
+        cursor: pointer;
+
+        transition: 0.2s;
+      }
+
+      #rollButton {
+        background: #ffd166;
+        color: #333;
+      }
+
+      #rollButton:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 7px 15px rgba(0, 0, 0, 0.2);
+      }
+
+      #yesButton {
+        background: #06d6a0;
+        color: white;
+      }
+
+      #noButton {
+        background: #ef476f;
+        color: white;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      /* =========================
+           PLAY AGAIN AREA
+        ========================== */
+
+      #playAgainArea {
+        display: none;
+
+        margin-top: 20px;
+      }
+
+      #playAgainArea p {
+        margin-bottom: 10px;
+        font-size: 18px;
+      }
+
+      /* =========================
+           WIN MESSAGE
+        ========================== */
+
+      .winner {
+        font-size: 25px !important;
+        animation: celebrate 0.7s infinite alternate;
+      }
+
+      @keyframes celebrate {
+        from {
+          transform: scale(1);
+        }
+
+        to {
+          transform: scale(1.08);
+        }
+      }
+
+      /* =========================
+           MOBILE
+        ========================== */
+
+      @media (max-width: 500px) {
+        .game-container {
+          padding: 25px;
+        }
+
+        h1 {
+          font-size: 28px;
+        }
+
+        .dice {
+          width: 110px;
+          height: 110px;
+          font-size: 60px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="game-container">
+      <h1>🎲 Lucky Dice</h1>
+
+      <p class="subtitle">Roll the dice and get a 6 to win!</p>
+
+      <!-- Dice -->
+      <div id="dice" class="dice">🎲</div>
+
+      <!-- Result -->
+      <div id="message">Click the button to roll!</div>
+
+      <!-- Roll button -->
+      <button id="rollButton" onclick="rollDice()">🎲 Roll Dice</button>
+
+      <!-- Yes / No area -->
+      <div id="playAgainArea">
+        <p>Do you want to roll again?</p>
+
+        <button id="yesButton" onclick="playAgain()">✅ Yes</button>
+
+        <button id="noButton" onclick="endGame()">❌ No</button>
+      </div>
+    </div>
+
+    <script>
+      // ==========================================
+      // GET HTML ELEMENTS
+      // ==========================================
+
+      const dice = document.getElementById("dice");
+
+      const message = document.getElementById("message");
+
+      const rollButton = document.getElementById("rollButton");
+
+      const playAgainArea = document.getElementById("playAgainArea");
+
+      // ==========================================
+      // DICE FACES
+      // ==========================================
+
+      const diceFaces = {
+        1: "⚀",
+        2: "⚁",
+        3: "⚂",
+        4: "⚃",
+        5: "⚄",
+        6: "⚅",
+      };
+
+      // ==========================================
+      // ROLL DICE FUNCTION
+      // Python:
+      // number = random.randint(1, 6)
+      // ==========================================
+
+      function rollDice() {
+        // Create random number between 1 and 6
+        const number = Math.floor(Math.random() * 6) + 1;
+
+        // Show rolling animation
+        dice.classList.add("rolling");
+
+        // Show dice number
+        dice.textContent = diceFaces[number];
+
+        // Remove animation
+        setTimeout(() => {
+          dice.classList.remove("rolling");
+        }, 300);
+
+        // ======================================
+        // CHECK IF USER ROLLED 6
+        // Python:
+        // if number == 6:
+        // ======================================
+
+        if (number === 6) {
+          message.textContent = "🎉 You won the match!";
+
+          message.classList.add("winner");
+
+          // Game is over
+          rollButton.disabled = true;
+
+          playAgainArea.style.display = "none";
+        } else {
+          message.textContent = "You rolled " + number + ". Not 6!";
+
+          // Ask user whether to continue
+          playAgainArea.style.display = "block";
+
+          // Hide main roll button
+          rollButton.style.display = "none";
+        }
+      }
+
+      // ==========================================
+      // USER CHOOSES YES
+      // Python:
+      // if Playagin == 'y':
+      //     continue
+      // ==========================================
+
+      function playAgain() {
+        // Hide Yes/No buttons
+        playAgainArea.style.display = "none";
+
+        // Show Roll button again
+        rollButton.style.display = "inline-block";
+
+        message.textContent = "🎲 Roll again!";
+      }
+
+      // ==========================================
+      // USER CHOOSES NO
+      // Python:
+      // else:
+      //     break
+      // ==========================================
+
+      function endGame() {
+        message.textContent = "👍 Game ended. Thanks for playing!";
+
+        playAgainArea.style.display = "none";
+
+        rollButton.disabled = true;
+
+        rollButton.style.display = "none";
+      }
+    </script>
+  </body>
+</html>
